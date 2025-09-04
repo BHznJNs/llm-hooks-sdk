@@ -61,7 +61,7 @@ export function aiSdkChunkToOpenAIChunk(
             delta: {
               reasoning_content: chunk.text,
               content: "",
-            },
+            } as any, // type assert to pass type check
             finish_reason: null,
           },
         ],
@@ -73,7 +73,10 @@ export function aiSdkChunkToOpenAIChunk(
         choices: [
           {
             index: 0 as const,
-            delta: { reasoning_content: "", content: "" },
+            delta: {
+              reasoning_content: "",
+              content: "",
+            } as any, // type assert to pass type check
             finish_reason: null,
           },
         ],
