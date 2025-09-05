@@ -2,6 +2,8 @@ import type { OpenAIProvider } from "@ai-sdk/openai";
 import type { Logger } from "pino";
 import type { OpenAI } from "./openai.ts";
 
+type PromiseOr<T> = Promise<T> | T;
+
 export type LlmModel = ReturnType<OpenAIProvider["chat"]>;
 export type ProviderOptions = Record<string, unknown>;
 
@@ -18,23 +20,25 @@ export type Plugin = Partial<{
       requestParams: OpenAI.ChatCompletionRequest;
       providerOptions: ProviderOptions;
     }>
-  ) => {
+  ) => PromiseOr<{
     requestParams: OpenAI.ChatCompletionRequest;
     providerOptions?: ProviderOptions;
-  };
+  } | null>;
   onUpstreamChunk: (
     args: PluginArguments<OpenAI.ChatCompletionResponseChunk>
-  ) => OpenAI.ChatCompletionResponseChunk | null;
+  ) => PromiseOr<OpenAI.ChatCompletionResponseChunk | null>;
   afterUpstreamResponse: (
     args: PluginArguments<OpenAI.ChatCompletionResponse | string>,
     isStream: boolean
-  ) =>
+  ) => PromiseOr<
     | OpenAI.ChatCompletionResponse
     | ReadableStream<
         | OpenAI.ChatCompletionResponseChunk
         | OpenAI.ChatCompletionResponseErrorChunk
-      >;
+      >
+    | null
+  >;
   onFetchModelList: (
     args: PluginArguments<OpenAI.ModelListResponse>
-  ) => OpenAI.ModelListResponse;
+  ) => PromiseOr<OpenAI.ModelListResponse | null>;
 }>;
