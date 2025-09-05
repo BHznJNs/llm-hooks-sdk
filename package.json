@@ -1,6 +1,6 @@
 {
   "name": "llm-hooks-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The SDK for LLM-Hooks",
   "exports": {
     ".": {
