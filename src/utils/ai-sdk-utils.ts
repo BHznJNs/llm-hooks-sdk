@@ -4,8 +4,9 @@ import type {
   StreamTextResult,
   TextStreamPart,
 } from 'ai';
-import type { OpenAI } from './types/openai.ts';
-import { chatIdFactory } from './utils.ts';
+import type { OpenAI } from '../types/openai.ts';
+import { chatIdFactory } from './index.ts';
+import { chunkBaseFactory, errorChunkFactory } from './openai.ts';
 
 const finishReasonMap = new Map<
   FinishReason,
@@ -29,16 +30,7 @@ export function aiSdkChunkToOpenAIChunk(
   | OpenAI.ChatCompletionResponseChunk
   | OpenAI.ChatCompletionResponseErrorChunk
   | null {
-  const SECOND = 1000;
-  const created = Math.floor(Date.now() / SECOND);
-  const chunkBase = {
-    id: chatId,
-    created,
-    model,
-    object: 'chat.completion.chunk',
-  } satisfies Partial<
-    OpenAI.ChatCompletionResponseChunk | OpenAI.ChatCompletionResponseErrorChunk
-  >;
+  const chunkBase = chunkBaseFactory(chatId, model);
   switch (chunk.type) {
     case 'reasoning-start': {
       return {
@@ -195,20 +187,7 @@ export function aiSdkChunkToOpenAIChunk(
       };
     }
     case 'error': {
-      const errorMessage: string =
-        typeof chunk.error === 'object' &&
-        chunk.error !== null &&
-        'message' in chunk.error
-          ? (chunk.error.message as string)
-          : JSON.stringify(chunk.error);
-      return {
-        ...chunkBase,
-        choices: [{ index: 0 as const, delta: {}, finish_reason: 'stop' }],
-        error: {
-          message: errorMessage,
-          type: 'upstream_error',
-        },
-      };
+      return errorChunkFactory(chatId, model, chunk.error);
     }
     case 'finish': {
       const aiSdkUsageData = chunk.totalUsage;

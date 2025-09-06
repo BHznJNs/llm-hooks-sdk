@@ -1,6 +1,24 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
   "extends": ["ultracite"],
+  "linter": {
+    "rules": {
+      "style": {
+        "useDefaultSwitchClause": "off",
+        "noNonNullAssertion": "off"
+      },
+      "nursery": {
+        "noUnnecessaryConditions": "off"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "off"
+      }
+    }
+  },
   "javascript": {
     "formatter": {
       "quoteStyle": "single"

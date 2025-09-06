@@ -1,14 +1,11 @@
-import type { OpenAIProvider } from '@ai-sdk/openai';
 import type { Logger } from 'pino';
+import type { LlmModel, ProviderOptions } from './ai-sdk.ts';
+import type { PromiseOr } from './index.ts';
 import type { OpenAI } from './openai.ts';
-
-type PromiseOr<T> = Promise<T> | T;
-
-export type LlmModel = ReturnType<OpenAIProvider['chat']>;
-export type ProviderOptions = Record<string, unknown>;
 
 export type PluginArguments<T> = {
   data: T;
+  chatId: string;
   logger: Logger;
   model: LlmModel;
   metadata: Record<string, unknown>;
@@ -42,3 +39,5 @@ export type Plugin = Partial<{
     args: PluginArguments<OpenAI.ModelListResponse>
   ) => PromiseOr<OpenAI.ModelListResponse | null>;
 }>;
+
+export type HookType = keyof Plugin;
