@@ -1,14 +1,14 @@
-import esbuild from "esbuild";
-import { nodeExternalsPlugin } from "esbuild-node-externals";
+import esbuild from 'esbuild';
+import { nodeExternalsPlugin } from 'esbuild-node-externals';
 
 esbuild
   .build({
-    entryPoints: ["src/index.ts"],
-    outfile: "dist/index.js",
+    entryPoints: ['src/index.ts'],
+    outfile: 'dist/index.js',
     bundle: true,
-    platform: "node",
-    target: "node22",
-    format: "esm",
+    platform: 'node',
+    target: 'node22',
+    format: 'esm',
     sourcemap: true,
     minify: false,
     plugins: [nodeExternalsPlugin()],

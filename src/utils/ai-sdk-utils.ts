@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/noBannedTypes: For more convenient to use AI SDK types */
 import type {
   FinishReason,
   GenerateTextResult,
@@ -6,7 +7,7 @@ import type {
 } from 'ai';
 import type { OpenAI } from '../types/openai.ts';
 import { chatIdFactory } from './index.ts';
-import { chunkBaseFactory, errorChunkFactory } from './openai.ts';
+import { openAiChunkBaseFactory, openAiErrorChunkFactory } from './openai.ts';
 
 const finishReasonMap = new Map<
   FinishReason,
@@ -21,8 +22,20 @@ const finishReasonMap = new Map<
   ['unknown', null],
 ]);
 
-export function aiSdkChunkToOpenAIChunk(
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
+export function aiSdkToolCallToOpenAI(
+  toolCall: GenerateTextResult<{}, string>['toolCalls'][number]
+): OpenAI.ChatCompletionResponseToolCall {
+  return {
+    id: toolCall.toolCallId,
+    type: 'function',
+    function: {
+      name: toolCall.toolName,
+      arguments: toolCall.input as string,
+    },
+  } satisfies OpenAI.ChatCompletionResponseToolCall;
+}
+
+export function aiSdkChunkToOpenAI(
   chunk: TextStreamPart<{}>,
   chatId: string,
   model: string
@@ -30,7 +43,7 @@ export function aiSdkChunkToOpenAIChunk(
   | OpenAI.ChatCompletionResponseChunk
   | OpenAI.ChatCompletionResponseErrorChunk
   | null {
-  const chunkBase = chunkBaseFactory(chatId, model);
+  const chunkBase = openAiChunkBaseFactory(chatId, model);
   switch (chunk.type) {
     case 'reasoning-start': {
       return {
@@ -187,7 +200,7 @@ export function aiSdkChunkToOpenAIChunk(
       };
     }
     case 'error': {
-      return errorChunkFactory(chatId, model, chunk.error);
+      return openAiErrorChunkFactory(chatId, model, chunk.error);
     }
     case 'finish': {
       const aiSdkUsageData = chunk.totalUsage;
@@ -213,9 +226,8 @@ export function aiSdkChunkToOpenAIChunk(
   }
 }
 
-export function aiSdkStreamResultToOpenAIStream(
+export function aiSdkStreamToOpenAI(
   model: string,
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
   result: StreamTextResult<{}, string>
 ): ReadableStream<OpenAI.ChatCompletionResponseChunk> {
   const stream = new ReadableStream({
@@ -223,7 +235,7 @@ export function aiSdkStreamResultToOpenAIStream(
       const chatId = chatIdFactory();
       try {
         for await (const chunk of result.fullStream) {
-          const openaiChunk = aiSdkChunkToOpenAIChunk(chunk, chatId, model);
+          const openaiChunk = aiSdkChunkToOpenAI(chunk, chatId, model);
           if (openaiChunk === null) {
             continue;
           }
@@ -239,18 +251,18 @@ export function aiSdkStreamResultToOpenAIStream(
   return stream;
 }
 
-export function aiSdkNonStreamResultToOpenAIResponse(
+export function aiSdkNonStreamResponseToOpenAI(
   model: string,
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
-  result: GenerateTextResult<{}, string>
+  result: GenerateTextResult<{}, string>,
+  chatId?: string
 ): OpenAI.ChatCompletionResponse {
-  const SECOND = 1000;
-  const created = Math.floor(Date.now() / SECOND);
-  return {
-    id: `chatcmpl-${created}`,
+  const tempChunk = openAiChunkBaseFactory(chatId ?? chatIdFactory(), model);
+  const chunkBase = {
+    ...tempChunk,
     object: 'chat.completion',
-    created,
-    model,
+  } satisfies Partial<OpenAI.ChatCompletionResponse>;
+  return {
+    ...chunkBase,
     choices: [
       {
         index: 0,
@@ -258,17 +270,7 @@ export function aiSdkNonStreamResultToOpenAIResponse(
           role: 'assistant',
           content: result.text,
           refusal: null,
-          tool_calls: result.toolCalls.map(
-            (toolCall) =>
-              ({
-                id: toolCall.toolCallId,
-                type: 'function',
-                function: {
-                  name: toolCall.toolName,
-                  arguments: String(toolCall.input),
-                },
-              }) satisfies OpenAI.ChatCompletionResponseToolCall
-          ),
+          tool_calls: result.toolCalls.map(aiSdkToolCallToOpenAI),
         },
         finish_reason: finishReasonMap.get(result.finishReason) ?? 'stop',
         logprobs: null,

@@ -1,6 +1,6 @@
 import type { OpenAI } from '../types/openai.ts';
 
-export function chunkBaseFactory(chatId: string, model: string) {
+export function openAiChunkBaseFactory(chatId: string, model: string) {
   const SECOND = 1000;
   const created = Math.floor(Date.now() / SECOND);
   return {
@@ -13,12 +13,12 @@ export function chunkBaseFactory(chatId: string, model: string) {
   >;
 }
 
-export function errorChunkFactory(
+export function openAiErrorChunkFactory(
   chatId: string,
   model: string,
   error: unknown
 ): OpenAI.ChatCompletionResponseErrorChunk {
-  const chunkBase = chunkBaseFactory(chatId, model);
+  const chunkBase = openAiChunkBaseFactory(chatId, model);
   const errorMessage: string =
     typeof error === 'object' && error !== null && 'message' in error
       ? (error.message as string)
