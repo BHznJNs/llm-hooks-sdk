@@ -3,21 +3,21 @@ import type {
   GenerateTextResult,
   StreamTextResult,
   TextStreamPart,
-} from "ai";
-import type { OpenAI } from "./types/openai.ts";
-import { chatIdFactory } from "./utils.ts";
+} from 'ai';
+import type { OpenAI } from './types/openai.ts';
+import { chatIdFactory } from './utils.ts';
 
 const finishReasonMap = new Map<
   FinishReason,
   OpenAI.ChatCompletionFinishReason
 >([
-  ["stop", "stop"],
-  ["length", "length"],
-  ["content-filter", "content_filter"],
-  ["tool-calls", "tool_calls"],
-  ["error", null],
-  ["other", null],
-  ["unknown", null],
+  ['stop', 'stop'],
+  ['length', 'length'],
+  ['content-filter', 'content_filter'],
+  ['tool-calls', 'tool_calls'],
+  ['error', null],
+  ['other', null],
+  ['unknown', null],
 ]);
 
 export function aiSdkChunkToOpenAIChunk(
@@ -35,24 +35,24 @@ export function aiSdkChunkToOpenAIChunk(
     id: chatId,
     created,
     model,
-    object: "chat.completion.chunk",
+    object: 'chat.completion.chunk',
   } satisfies Partial<
     OpenAI.ChatCompletionResponseChunk | OpenAI.ChatCompletionResponseErrorChunk
   >;
   switch (chunk.type) {
-    case "reasoning-start": {
+    case 'reasoning-start': {
       return {
         ...chunkBase,
         choices: [
           {
             index: 0 as const,
-            delta: { role: "assistant", content: "" },
+            delta: { role: 'assistant', content: '' },
             finish_reason: null,
           },
         ],
       };
     }
-    case "reasoning-delta": {
+    case 'reasoning-delta': {
       return {
         ...chunkBase,
         choices: [
@@ -60,41 +60,41 @@ export function aiSdkChunkToOpenAIChunk(
             index: 0 as const,
             delta: {
               reasoning_content: chunk.text,
-              content: "",
+              content: '',
             } as any, // type assert to pass type check
             finish_reason: null,
           },
         ],
       };
     }
-    case "reasoning-end": {
+    case 'reasoning-end': {
       return {
         ...chunkBase,
         choices: [
           {
             index: 0 as const,
             delta: {
-              reasoning_content: "",
-              content: "",
+              reasoning_content: '',
+              content: '',
             } as any, // type assert to pass type check
             finish_reason: null,
           },
         ],
       };
     }
-    case "text-start": {
+    case 'text-start': {
       return {
         ...chunkBase,
         choices: [
           {
             index: 0 as const,
-            delta: { role: "assistant", content: "" },
+            delta: { role: 'assistant', content: '' },
             finish_reason: null,
           },
         ],
       };
     }
-    case "text-delta": {
+    case 'text-delta': {
       return {
         ...chunkBase,
         choices: [
@@ -106,25 +106,25 @@ export function aiSdkChunkToOpenAIChunk(
         ],
       };
     }
-    case "text-end": {
+    case 'text-end': {
       return {
         ...chunkBase,
-        choices: [{ index: 0 as const, delta: {}, finish_reason: "stop" }],
+        choices: [{ index: 0 as const, delta: {}, finish_reason: null }],
       };
     }
-    case "tool-input-start": {
+    case 'tool-input-start': {
       return {
         ...chunkBase,
         choices: [
           {
             index: 0 as const,
             delta: {
-              role: "assistant",
-              content: "",
+              role: 'assistant',
+              content: '',
               tool_calls: [
                 {
                   index: 0,
-                  type: "function",
+                  type: 'function',
                   id: chunk.id,
                   function: {
                     name: chunk.toolName,
@@ -137,7 +137,7 @@ export function aiSdkChunkToOpenAIChunk(
         ],
       };
     }
-    case "tool-input-delta": {
+    case 'tool-input-delta': {
       return {
         ...chunkBase,
         choices: [
@@ -158,7 +158,7 @@ export function aiSdkChunkToOpenAIChunk(
         ],
       };
     }
-    case "tool-input-end": {
+    case 'tool-input-end': {
       return {
         ...chunkBase,
         choices: [
@@ -170,7 +170,7 @@ export function aiSdkChunkToOpenAIChunk(
         ],
       };
     }
-    case "tool-call": {
+    case 'tool-call': {
       return {
         ...chunkBase,
         choices: [
@@ -180,7 +180,7 @@ export function aiSdkChunkToOpenAIChunk(
               tool_calls: [
                 {
                   index: 0,
-                  type: "function",
+                  type: 'function',
                   id: chunk.toolCallId,
                   function: {
                     name: chunk.toolName,
@@ -194,23 +194,23 @@ export function aiSdkChunkToOpenAIChunk(
         ],
       };
     }
-    case "error": {
+    case 'error': {
       const errorMessage: string =
-        typeof chunk.error === "object" &&
+        typeof chunk.error === 'object' &&
         chunk.error !== null &&
-        "message" in chunk.error
+        'message' in chunk.error
           ? (chunk.error.message as string)
           : JSON.stringify(chunk.error);
       return {
         ...chunkBase,
-        choices: [{ index: 0 as const, delta: {}, finish_reason: "stop" }],
+        choices: [{ index: 0 as const, delta: {}, finish_reason: 'stop' }],
         error: {
           message: errorMessage,
-          type: "upstream_error",
+          type: 'upstream_error',
         },
       };
     }
-    case "finish": {
+    case 'finish': {
       const aiSdkUsageData = chunk.totalUsage;
       return {
         ...chunkBase,
@@ -269,21 +269,21 @@ export function aiSdkNonStreamResultToOpenAIResponse(
   const created = Math.floor(Date.now() / SECOND);
   return {
     id: `chatcmpl-${created}`,
-    object: "chat.completion",
+    object: 'chat.completion',
     created,
     model,
     choices: [
       {
         index: 0,
         message: {
-          role: "assistant",
+          role: 'assistant',
           content: result.text,
           refusal: null,
           tool_calls: result.toolCalls.map(
             (toolCall) =>
               ({
                 id: toolCall.toolCallId,
-                type: "function",
+                type: 'function',
                 function: {
                   name: toolCall.toolName,
                   arguments: String(toolCall.input),
@@ -291,7 +291,7 @@ export function aiSdkNonStreamResultToOpenAIResponse(
               }) satisfies OpenAI.ChatCompletionResponseToolCall
           ),
         },
-        finish_reason: finishReasonMap.get(result.finishReason) ?? "stop",
+        finish_reason: finishReasonMap.get(result.finishReason) ?? 'stop',
         logprobs: null,
       },
     ],

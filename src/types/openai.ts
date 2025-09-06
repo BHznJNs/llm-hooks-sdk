@@ -5,11 +5,11 @@ import type {
   ChatCompletionMessageToolCall,
   ChatCompletionTool as ChatCompletionTool_,
   Model,
-} from "openai/resources";
+} from 'openai/resources';
 
 type ErrorChunk = {
   id: string;
-  object: "chat.completion.chunk";
+  object: 'chat.completion.chunk';
   created: number;
   model: string;
   choices: [
@@ -17,7 +17,7 @@ type ErrorChunk = {
       index: 0;
       // biome-ignore lint/complexity/noBannedTypes: here is a fixed empty object
       delta: {};
-      finish_reason: "stop";
+      finish_reason: 'stop';
     },
   ];
   error: {
@@ -35,11 +35,11 @@ export namespace OpenAI {
   export type ChatCompletionTool = ChatCompletionTool_;
   export type ChatCompletionResponseToolCall = ChatCompletionMessageToolCall;
   export type ChatCompletionFinishReason =
-    | "stop"
-    | "length"
-    | "tool_calls"
-    | "content_filter"
-    | "function_call"
+    | 'stop'
+    | 'length'
+    | 'tool_calls'
+    | 'content_filter'
+    | 'function_call'
     | null;
 
   export type ModelListResponse = {
