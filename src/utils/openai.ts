@@ -1,6 +1,9 @@
 import type { OpenAI } from '../types/openai.ts';
 
-export function openAiChunkBaseFactory(chatId: string, model: string) {
+export function openAiChunkBaseFactory(
+  chatId: string,
+  model: string
+): OpenAI.ChatCompletionResponseBaseChunk {
   const SECOND = 1000;
   const created = Math.floor(Date.now() / SECOND);
   return {
@@ -8,9 +11,7 @@ export function openAiChunkBaseFactory(chatId: string, model: string) {
     created,
     model,
     object: 'chat.completion.chunk',
-  } satisfies Partial<
-    OpenAI.ChatCompletionResponseChunk | OpenAI.ChatCompletionResponseErrorChunk
-  >;
+  };
 }
 
 export function openAiErrorChunkFactory(
@@ -25,7 +26,7 @@ export function openAiErrorChunkFactory(
       : JSON.stringify(error);
   return {
     ...chunkBase,
-    choices: [{ index: 0 as const, delta: {}, finish_reason: 'stop' }],
+    choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
     error: {
       message: errorMessage,
       type: 'upstream_error',

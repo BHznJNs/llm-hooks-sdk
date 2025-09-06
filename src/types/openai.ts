@@ -7,6 +7,13 @@ import type {
   Model,
 } from 'openai/resources';
 
+type BaseChunk = {
+  id: string;
+  created: number;
+  model: string;
+  object: 'chat.completion.chunk';
+};
+
 type ErrorChunk = {
   id: string;
   object: 'chat.completion.chunk';
@@ -30,6 +37,7 @@ type ErrorChunk = {
 export namespace OpenAI {
   export type ChatCompletionRequest = ChatCompletionCreateParams;
   export type ChatCompletionResponse = ChatCompletion;
+  export type ChatCompletionResponseBaseChunk = BaseChunk;
   export type ChatCompletionResponseChunk = ChatCompletionChunk;
   export type ChatCompletionResponseErrorChunk = ErrorChunk;
   export type ChatCompletionTool = ChatCompletionTool_;
