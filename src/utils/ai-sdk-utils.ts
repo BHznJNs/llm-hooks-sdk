@@ -228,14 +228,15 @@ export function aiSdkChunkToOpenAI(
 
 export function aiSdkStreamToOpenAI(
   model: string,
-  result: StreamTextResult<{}, string>
+  result: StreamTextResult<{}, string>,
+  chatId?: string
 ): ReadableStream<OpenAI.ChatCompletionResponseChunk> {
   const stream = new ReadableStream({
     async start(controller) {
-      const chatId = chatIdFactory();
+      const chunkChatId = chatId ?? chatIdFactory();
       try {
         for await (const chunk of result.fullStream) {
-          const openaiChunk = aiSdkChunkToOpenAI(chunk, chatId, model);
+          const openaiChunk = aiSdkChunkToOpenAI(chunk, chunkChatId, model);
           if (openaiChunk === null) {
             continue;
           }
