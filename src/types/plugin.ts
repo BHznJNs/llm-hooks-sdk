@@ -36,7 +36,7 @@ export type Plugin = Partial<{
     | null
   >;
   onFetchModelList: (
-    args: PluginArguments<OpenAI.ModelListResponse>
+    args: Omit<PluginArguments<OpenAI.ModelListResponse>, 'chatId'>
   ) => PromiseOr<OpenAI.ModelListResponse | null>;
 }>;
 
