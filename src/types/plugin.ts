@@ -4,11 +4,11 @@ import type { PromiseOr } from './index.ts';
 import type { OpenAI } from './openai.ts';
 
 export type PluginArguments<T> = {
-  data: T;
-  chatId: string;
-  logger: Logger;
-  model: LlmModel;
-  metadata: Record<string, unknown>;
+  readonly data: T;
+  readonly chatId: string;
+  readonly logger: Logger;
+  readonly model: LlmModel;
+  readonly metadata: Record<string, unknown>;
 };
 
 export type Plugin = Partial<{
